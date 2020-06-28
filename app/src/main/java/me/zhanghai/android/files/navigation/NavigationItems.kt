@@ -298,11 +298,11 @@ private val DEFAULT_STANDARD_DIRECTORIES = listOf(
     ),
     StandardDirectory(
         R.drawable.video_icon_white_24dp, R.string.navigation_standard_directory_movies,
-        Environment.DIRECTORY_MOVIES, true
+        Environment.DIRECTORY_MOVIES, false
     ),
     StandardDirectory(
         R.drawable.audio_icon_white_24dp, R.string.navigation_standard_directory_music,
-        Environment.DIRECTORY_MUSIC, true
+        Environment.DIRECTORY_MUSIC, false
     ),
     StandardDirectory(
         R.drawable.notification_icon_white_24dp,
