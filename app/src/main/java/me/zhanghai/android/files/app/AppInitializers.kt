@@ -6,7 +6,7 @@
 package me.zhanghai.android.files.app
 
 import android.os.Build
-import com.facebook.stetho.Stetho
+//import com.facebook.stetho.Stetho
 import com.jakewharton.threetenabp.AndroidThreeTen
 import me.zhanghai.android.files.coil.initializeCoil
 import me.zhanghai.android.files.compat.RestrictedHiddenApiAccess
@@ -26,7 +26,7 @@ val appInitializers = listOf(
 
 private fun initializeCrashlytics() {
 //#ifdef NONFREE
-    me.zhanghai.android.files.nonfree.CrashlyticsInitializer.initialize()
+//    me.zhanghai.android.files.nonfree.CrashlyticsInitializer.initialize()
 //#endif
 }
 
@@ -39,7 +39,7 @@ private fun initializeThreeTen() {
 }
 
 private fun initializeStetho() {
-    Stetho.initializeWithDefaults(application)
+//    Stetho.initializeWithDefaults(application)
 }
 
 private fun initializeFileSystemProviders() {
@@ -65,8 +65,9 @@ private fun createNotificationChannels() {
         notificationManager.createNotificationChannels(
             listOf(
                 backgroundActivityStartNotificationTemplate.channelTemplate,
-                fileJobNotificationTemplate.channelTemplate,
-                ftpServerServiceNotificationTemplate.channelTemplate
+                fileJobNotificationTemplate.channelTemplate
+//                    ,
+//                ftpServerServiceNotificationTemplate.channelTemplate
             ).map { it.create(application) }
         )
     }

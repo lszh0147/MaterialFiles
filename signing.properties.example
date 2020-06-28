@@ -1,4 +1,4 @@
-storeFile=
-storePassword=
-keyAlias=
-keyPassword=
+storeFile=../TestKey.jks
+storePassword=123321
+keyAlias=Test
+keyPassword=123321

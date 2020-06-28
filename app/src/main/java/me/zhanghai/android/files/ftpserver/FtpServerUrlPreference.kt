@@ -62,9 +62,9 @@ class FtpServerUrlPreference : Preference {
         Settings.FTP_SERVER_ANONYMOUS_LOGIN.observeForever(observer)
         Settings.FTP_SERVER_USERNAME.observeForever(observer)
         Settings.FTP_SERVER_PORT.observeForever(observer)
-        context.registerReceiver(
-            connectivityReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        )
+//        context.registerReceiver(
+//            connectivityReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+//        )
     }
 
     override fun onDetached() {

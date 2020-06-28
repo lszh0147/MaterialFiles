@@ -3,7 +3,7 @@ android {
         release {
 
             def properties
-            def propertiesFile = rootProject.file('signing.properties')
+            def propertiesFile = rootProject.file('signing.properties.example')
             if (propertiesFile.exists()) {
                 properties = new Properties()
                 properties.load(propertiesFile.newDataInputStream())

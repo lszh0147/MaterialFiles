@@ -19,18 +19,18 @@ buildscript {
         google()
         jcenter()
     }
-    dependencies {
-        classpath 'com.google.gms:google-services:4.3.3'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.1.1'
-    }
+//    dependencies {
+//        classpath 'com.google.gms:google-services:4.3.3'
+//        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.1.1'
+//    }
 }
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+//apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
 //#endif
 
 android {
     compileSdkVersion 29
-    ndkVersion '21.3.6528147'
+    ndkVersion '21.0.6113669'
     buildToolsVersion '29.0.3'
     defaultConfig {
         applicationId 'me.zhanghai.android.files'
@@ -69,9 +69,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
 //#ifdef NONFREE
-            firebaseCrashlytics {
-                nativeSymbolUploadEnabled true
-            }
+//            firebaseCrashlytics {
+//                nativeSymbolUploadEnabled true
+//            }
 //#endif
         }
     }
@@ -92,7 +92,7 @@ repositories {
 }
 dependencies {
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    releaseImplementation 'com.github.mypplication:stetho-noop:1.1'
+//    releaseImplementation 'com.github.mypplication:stetho-noop:1.1'
 }
 
 dependencies {
@@ -128,7 +128,7 @@ dependencies {
 
     implementation 'com.caverock:androidsvg-aar:1.4'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
-    debugImplementation 'com.facebook.stetho:stetho:1.5.1'
+//    debugImplementation 'com.facebook.stetho:stetho:1.5.1'//Android调试工具。它可以通过chrome的开发者工具来辅助安卓开发
     // If added along with okhttp3, remove the related dontwarn from proguard-rules.pro.
     //debugImplementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
     implementation ('com.github.junrar:junrar:4.0.0') {
@@ -169,8 +169,8 @@ dependencies {
     implementation 'org.slf4j:slf4j-android:1.7.30'
 
 //#ifdef NONFREE
-    implementation 'com.google.firebase:firebase-analytics:17.4.3'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.1'
-    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.0.1'
+//    implementation 'com.google.firebase:firebase-analytics:17.4.3'
+//    implementation 'com.google.firebase:firebase-crashlytics:17.0.1'
+//    implementation 'com.google.firebase:firebase-crashlytics-ndk:17.0.1'
 //#endif
 }

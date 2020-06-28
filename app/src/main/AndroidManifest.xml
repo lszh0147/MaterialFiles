@@ -12,10 +12,10 @@
 
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<!--    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />-->
+<!--    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+<!--    <uses-permission android:name="android.permission.INTERNET" />-->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -242,17 +242,17 @@
 
         <service android:name="me.zhanghai.android.files.filejob.FileJobService" />
 
-        <service android:name="me.zhanghai.android.files.ftpserver.FtpServerService" />
+<!--        <service android:name="me.zhanghai.android.files.ftpserver.FtpServerService" />-->
 
-        <service
-            android:name="me.zhanghai.android.files.ftpserver.FtpServerTileService"
-            android:icon="@drawable/shared_directory_icon_white_24dp"
-            android:label="@string/ftp_server_title"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
-            </intent-filter>
-        </service>
+<!--        <service-->
+<!--            android:name="me.zhanghai.android.files.ftpserver.FtpServerTileService"-->
+<!--            android:icon="@drawable/shared_directory_icon_white_24dp"-->
+<!--            android:label="@string/ftp_server_title"-->
+<!--            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.service.quicksettings.action.QS_TILE"/>-->
+<!--            </intent-filter>-->
+<!--        </service>-->
 
         <provider
             android:name="me.zhanghai.android.files.app.AppProvider"
@@ -267,11 +267,11 @@
 
         <receiver android:name="me.zhanghai.android.files.filejob.FileJobReceiver" />
 
-        <receiver android:name="me.zhanghai.android.files.ftpserver.FtpServerReceiver" />
+<!--        <receiver android:name="me.zhanghai.android.files.ftpserver.FtpServerReceiver" />-->
 
-        <meta-data
-            android:name="firebase_crashlytics_collection_enabled"
-            android:value="false" />
+<!--        <meta-data-->
+<!--            android:name="firebase_crashlytics_collection_enabled"-->
+<!--            android:value="false" />-->
 
         <!-- We need to reference a MD2 theme in XML for R8 to keep relevant resources. -->
         <activity
