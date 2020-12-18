@@ -11,8 +11,9 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import coil.api.clear
-import coil.api.loadAny
+import androidx.recyclerview.widget.RecyclerView
+import coil.clear
+import coil.loadAny
 import coil.size.OriginalSize
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -30,7 +31,7 @@ import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.provider.common.AndroidFileTypeDetector
 import me.zhanghai.android.files.provider.common.newInputStream
 import me.zhanghai.android.files.provider.common.readAttributes
-import me.zhanghai.android.files.ui.ViewPagerAdapter
+import me.zhanghai.android.files.ui.SimpleAdapter
 import me.zhanghai.android.files.util.fadeInUnsafe
 import me.zhanghai.android.files.util.fadeOutUnsafe
 import me.zhanghai.android.files.util.layoutInflater
@@ -40,44 +41,28 @@ import kotlin.math.max
 class ImageViewerAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val listener: (View) -> Unit
-) : ViewPagerAdapter() {
-    private val paths = mutableListOf<Path>()
+) : SimpleAdapter<Path, ImageViewerAdapter.ViewHolder>() {
+    override val hasStableIds: Boolean
+        get() = true
 
-    fun replace(paths: List<Path>) {
-        this.paths.clear()
-        this.paths.addAll(paths)
-        notifyDataSetChanged()
-    }
+    override fun getItemId(position: Int): Long = getItem(position).hashCode().toLong()
 
-    override fun getCount(): Int = paths.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(ImageViewerItemBinding.inflate(parent.context.layoutInflater, parent, false))
 
-    public override fun onCreateView(container: ViewGroup, position: Int): View {
-        val binding = ImageViewerItemBinding.inflate(
-            container.context.layoutInflater, container, false
-        )
-        val path = paths[position]
-        binding.root.tag = binding to path
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val path = getItem(position)
+        val binding = holder.binding
         binding.image.setOnPhotoTapListener { view, _, _ -> listener(view) }
         binding.largeImage.setOnClickListener(listener)
-        container.addView(binding.root)
         loadImage(binding, path)
-        return binding.root
     }
 
-    public override fun onDestroyView(container: ViewGroup, position: Int, view: View) {
-        @Suppress("UNCHECKED_CAST")
-        val tag = view.tag as Pair<ImageViewerItemBinding, Path>
-        val (binding) = tag
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+
+        val binding = holder.binding
         binding.image.clear()
-        container.removeView(view)
-    }
-
-    public override fun getViewPosition(view: View): Int {
-        @Suppress("UNCHECKED_CAST")
-        val tag = view.tag as Pair<ImageViewerItemBinding, Path>
-        val (_, path) = tag
-        val index = paths.indexOf(path)
-        return if (index != -1) index else POSITION_NONE
     }
 
     private fun loadImage(binding: ImageViewerItemBinding, path: Path) {
@@ -110,7 +95,7 @@ class ImageViewerAdapter(
         path: Path,
         imageInfo: ImageInfo
     ) {
-        if (!imageInfo.isLargeImageViewPreferred) {
+        if (!imageInfo.shouldUseLargeImageView) {
             binding.image.apply {
                 isVisible = true
                 loadAny(path to imageInfo.attributes) {
@@ -147,7 +132,7 @@ class ImageViewerAdapter(
         }
     }
 
-    private val ImageInfo.isLargeImageViewPreferred: Boolean
+    private val ImageInfo.shouldUseLargeImageView: Boolean
         get() {
             // See BitmapFactory.cpp encodedFormatToString()
             if (mimeType == MimeType.IMAGE_GIF) {
@@ -155,6 +140,10 @@ class ImageViewerAdapter(
             }
             if (width <= 0 || height <= 0) {
                 return false
+            }
+            // 4 bytes per pixel for ARGB_8888.
+            if (width * height * 4 > MAX_BITMAP_SIZE) {
+                return true
             }
             if (width > 2048 || height > 2048) {
                 val ratio = width.toFloat() / height
@@ -182,6 +171,13 @@ class ImageViewerAdapter(
         binding.progress.fadeOutUnsafe()
         binding.errorText.fadeInUnsafe()
     }
+
+    companion object {
+        // @see android.graphics.RecordingCanvas#MAX_BITMAP_SIZE
+        private const val MAX_BITMAP_SIZE = 100 * 1024 * 1024
+    }
+
+    class ViewHolder(val binding: ImageViewerItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     private class ImageInfo(
         val attributes: BasicFileAttributes,

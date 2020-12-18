@@ -14,24 +14,18 @@ import android.widget.RadioGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.CreateArchiveDialogBinding
-import me.zhanghai.android.files.databinding.CreateArchiveDialogMd2Binding
 import me.zhanghai.android.files.databinding.CreateArchiveDialogTypeIncludeBinding
 import me.zhanghai.android.files.databinding.FileNameDialogNameIncludeBinding
-import me.zhanghai.android.files.databinding.FileNameDialogNameIncludeMd2Binding
-import me.zhanghai.android.files.file.FileItem
-import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.ParcelableArgs
 import me.zhanghai.android.files.util.args
 import me.zhanghai.android.files.util.putArgs
 import me.zhanghai.android.files.util.setTextWithSelection
 import me.zhanghai.android.files.util.show
-import me.zhanghai.android.files.util.valueCompat
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.compressors.CompressorStreamFactory
-import java.util.LinkedHashSet
 
 class CreateArchiveDialogFragment : FileNameDialogFragment() {
     private val args by args<Args>()
@@ -100,13 +94,13 @@ class CreateArchiveDialogFragment : FileNameDialogFragment() {
     }
 
     companion object {
-        fun show(files: LinkedHashSet<FileItem>, fragment: Fragment) {
+        fun show(files: FileItemSet, fragment: Fragment) {
             CreateArchiveDialogFragment().putArgs(Args(files)).show(fragment)
         }
     }
 
     @Parcelize
-    class Args(val files: LinkedHashSet<FileItem>) : ParcelableArgs
+    class Args(val files: FileItemSet) : ParcelableArgs
 
     protected class Binding private constructor(
         root: View,
@@ -115,35 +109,19 @@ class CreateArchiveDialogFragment : FileNameDialogFragment() {
         val typeGroup: RadioGroup
     ) : FileNameDialogFragment.Binding(root, nameLayout, nameEdit) {
         companion object {
-            fun inflate(inflater: LayoutInflater): Binding =
-                if (Settings.MATERIAL_DESIGN_2.valueCompat) {
-                    val binding = CreateArchiveDialogMd2Binding.inflate(inflater)
-                    val bindingRoot = binding.root
-                    val nameBinding = FileNameDialogNameIncludeMd2Binding.bind(bindingRoot)
-                    val typeBinding = CreateArchiveDialogTypeIncludeBinding.bind(bindingRoot)
-                    Binding(
-                        bindingRoot, nameBinding.nameLayout, nameBinding.nameEdit,
-                        typeBinding.typeGroup
-                    )
-                } else {
-                    val binding = CreateArchiveDialogBinding.inflate(inflater)
-                    val bindingRoot = binding.root
-                    val nameBinding = FileNameDialogNameIncludeBinding.bind(bindingRoot)
-                    val typeBinding = CreateArchiveDialogTypeIncludeBinding.bind(bindingRoot)
-                    Binding(
-                        bindingRoot, nameBinding.nameLayout, nameBinding.nameEdit,
-                        typeBinding.typeGroup
-                    )
-                }
+            fun inflate(inflater: LayoutInflater): Binding {
+                val binding = CreateArchiveDialogBinding.inflate(inflater)
+                val bindingRoot = binding.root
+                val nameBinding = FileNameDialogNameIncludeBinding.bind(bindingRoot)
+                val typeBinding = CreateArchiveDialogTypeIncludeBinding.bind(bindingRoot)
+                return Binding(
+                    bindingRoot, nameBinding.nameLayout, nameBinding.nameEdit, typeBinding.typeGroup
+                )
+            }
         }
     }
 
     interface Listener : FileNameDialogFragment.Listener {
-        fun archive(
-            files: LinkedHashSet<FileItem>,
-            name: String,
-            archiveType: String,
-            compressorType: String?
-        )
+        fun archive(files: FileItemSet, name: String, archiveType: String, compressorType: String?)
     }
 }

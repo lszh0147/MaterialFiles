@@ -7,7 +7,7 @@ package me.zhanghai.android.files.file
 
 import android.os.Parcelable
 import android.provider.DocumentsContract
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 // TODO: https://youtrack.jetbrains.com/issue/KT-28512
 //inline class MimeType (val value: String) {
@@ -48,7 +48,7 @@ data class MimeType (val value: String) : Parcelable {
 
     fun match(mimeType: MimeType): Boolean =
         type.let { it == "*" || mimeType.type == it }
-            && subtype.let { it == "*" || mimeType.type == it }
+            && subtype.let { it == "*" || mimeType.subtype == it }
             && parameters.let { it == null || mimeType.parameters == it }
 
     companion object {
@@ -58,6 +58,7 @@ data class MimeType (val value: String) : Parcelable {
         val IMAGE_ANY = "image/*".asMimeType()
         val IMAGE_GIF = "image/gif".asMimeType()
         val IMAGE_SVG_XML = "image/svg+xml".asMimeType()
+        val PDF = "application/pdf".asMimeType()
         val TEXT_PLAIN = "text/plain".asMimeType()
         val GENERIC = "application/octet-stream".asMimeType()
 

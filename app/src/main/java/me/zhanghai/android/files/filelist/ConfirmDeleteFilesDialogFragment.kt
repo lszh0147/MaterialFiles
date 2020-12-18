@@ -9,15 +9,13 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import kotlinx.android.parcel.Parcelize
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
-import me.zhanghai.android.files.compat.AlertDialogBuilderCompat
-import me.zhanghai.android.files.file.FileItem
 import me.zhanghai.android.files.util.ParcelableArgs
 import me.zhanghai.android.files.util.args
 import me.zhanghai.android.files.util.putArgs
 import me.zhanghai.android.files.util.show
-import java.util.LinkedHashSet
 
 class ConfirmDeleteFilesDialogFragment : AppCompatDialogFragment() {
     private val args by args<Args>()
@@ -45,7 +43,7 @@ class ConfirmDeleteFilesDialogFragment : AppCompatDialogFragment() {
             }
             getString(messageRes, files.size)
         }
-        return AlertDialogBuilderCompat.create(requireContext(), theme)
+        return MaterialAlertDialogBuilder(requireContext(), theme)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok) { _, _ -> listener.deleteFiles(files) }
             .setNegativeButton(android.R.string.cancel, null)
@@ -53,15 +51,15 @@ class ConfirmDeleteFilesDialogFragment : AppCompatDialogFragment() {
     }
 
     companion object {
-        fun show(files: LinkedHashSet<FileItem>, fragment: Fragment) {
+        fun show(files: FileItemSet, fragment: Fragment) {
             ConfirmDeleteFilesDialogFragment().putArgs(Args(files)).show(fragment)
         }
     }
 
     @Parcelize
-    class Args(val files: LinkedHashSet<FileItem>) : ParcelableArgs
+    class Args(val files: FileItemSet) : ParcelableArgs
 
     interface Listener {
-        fun deleteFiles(files: LinkedHashSet<FileItem>)
+        fun deleteFiles(files: FileItemSet)
     }
 }

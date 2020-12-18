@@ -71,6 +71,20 @@
     </notice>
 
     <notice>
+        <name>SMBJ-RPC</name>
+        <url>https://github.com/rapid7/smbj-rpc</url>
+        <copyright>Copyright 2017 Rapid7 Inc.</copyright>
+        <license>BSD 3-Clause License</license>
+    </notice>
+
+    <notice>
+        <name>Insetter</name>
+        <url>https://github.com/chrisbanes/insetter</url>
+        <copyright>Copyright 2019 Google LLC</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+
+    <notice>
         <name>librootjava</name>
         <url>https://github.com/Chainfire/librootjava</url>
         <copyright>Copyright 2018 Jorrit "Chainfire" Jongma</copyright>
@@ -82,6 +96,13 @@
         <url>https://github.com/Chainfire/libsuperuser</url>
         <copyright>Copyright 2012 Jorrit "Chainfire" Jongma</copyright>
         <license>Apache Software License 2.0</license>
+    </notice>
+
+    <notice>
+        <name>jcifs-ng</name>
+        <url>https://github.com/AgNO3/jcifs-ng</url>
+        <copyright>Copyright 2016 AgNO3 Gmbh &amp; Co. KG</copyright>
+        <license>GNU Lesser General Public License 2.1</license>
     </notice>
 
     <notice>

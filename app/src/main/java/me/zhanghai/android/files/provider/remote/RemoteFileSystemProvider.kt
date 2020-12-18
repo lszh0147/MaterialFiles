@@ -14,15 +14,14 @@ import java8.nio.file.AccessMode
 import java8.nio.file.CopyOption
 import java8.nio.file.DirectoryStream
 import java8.nio.file.FileStore
-import java8.nio.file.Files
 import java8.nio.file.LinkOption
 import java8.nio.file.OpenOption
 import java8.nio.file.Path
 import java8.nio.file.attribute.BasicFileAttributes
 import java8.nio.file.attribute.FileAttribute
 import java8.nio.file.spi.FileSystemProvider
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.runBlocking
+import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.provider.common.PathObservable
 import me.zhanghai.android.files.provider.common.PathObservableProvider
 import me.zhanghai.android.files.provider.common.Searchable
@@ -77,11 +76,9 @@ abstract class RemoteFileSystemProvider(
         directory: Path,
         filter: DirectoryStream.Filter<in Path>
     ): DirectoryStream<Path> {
-        val filter = when {
-            filter is Parcelable -> filter
-            // Allow Files.AcceptAllFilter, but make it Parcelable.
-            filter.javaClass.enclosingClass == Files::class.java ->
-                ParcelableAcceptAllFilter.instance
+        val filter = when (filter) {
+            is Parcelable -> filter
+            filesAcceptAllFilter -> ParcelableAcceptAllFilter.instance
             else -> throw IllegalArgumentException("$filter is not Parcelable")
         }
         return remoteInterface.get().call { exception ->

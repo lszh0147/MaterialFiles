@@ -12,6 +12,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegateCompat
+import me.zhanghai.android.files.app.application
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.util.SimpleActivityLifecycleCallbacks
 import me.zhanghai.android.files.util.valueCompat
@@ -44,8 +45,7 @@ object NightModeHelper {
         for (activity in activities) {
             val nightMode = nightMode
             if (activity is OnNightModeChangedListener) {
-                val localNightMode = activity.delegate.localNightMode
-                if (getUiModeNight(localNightMode, activity)
+                if (getUiModeNight(activity.delegate.localNightMode, activity)
                     != getUiModeNight(nightMode, activity)) {
                     activity.onNightModeChangedFromHelper(nightMode)
                 }
@@ -62,13 +62,17 @@ object NightModeHelper {
      * @see androidx.appcompat.app.AppCompatDelegateImpl#updateForNightMode(int, boolean)
      */
     private fun getUiModeNight(nightMode: Int, activity: AppCompatActivity): Int =
-        when (AppCompatDelegateCompat.mapNightMode(activity.delegate, nightMode)) {
+        when (AppCompatDelegateCompat.mapNightMode(activity.delegate, application, nightMode)) {
             AppCompatDelegate.MODE_NIGHT_YES -> Configuration.UI_MODE_NIGHT_YES
             AppCompatDelegate.MODE_NIGHT_NO -> Configuration.UI_MODE_NIGHT_NO
             else ->
                 (activity.applicationContext.resources.configuration.uiMode
                     and Configuration.UI_MODE_NIGHT_MASK)
         }
+
+    fun isInNightMode(activity: AppCompatActivity): Boolean =
+        (getUiModeNight(activity.delegate.localNightMode, activity)
+            == Configuration.UI_MODE_NIGHT_YES)
 
     interface OnNightModeChangedListener {
         fun onNightModeChangedFromHelper(nightMode: Int)

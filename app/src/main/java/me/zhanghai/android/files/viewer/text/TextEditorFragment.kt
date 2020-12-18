@@ -7,7 +7,6 @@ package me.zhanghai.android.files.viewer.text
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -15,17 +14,16 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.observe
 import java8.nio.file.Path
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.TextEditorFragmentBinding
 import me.zhanghai.android.files.ui.ThemedFastScroller
 import me.zhanghai.android.files.util.Failure
 import me.zhanghai.android.files.util.Loading
 import me.zhanghai.android.files.util.ParcelableArgs
-import me.zhanghai.android.files.util.SimpleTextWatcher
 import me.zhanghai.android.files.util.StateData
 import me.zhanghai.android.files.util.Stateful
 import me.zhanghai.android.files.util.Success
@@ -60,7 +58,7 @@ class TextEditorFragment : Fragment(), ConfirmReloadDialogFragment.Listener,
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
+    ): View =
         TextEditorFragmentBinding.inflate(inflater, container, false)
             .also { binding = it }
             .root
@@ -88,14 +86,12 @@ class TextEditorFragment : Fragment(), ConfirmReloadDialogFragment.Listener,
         if (textEditSavedState != null) {
             binding.textEdit.onRestoreInstanceState(textEditSavedState)
         }
-        binding.textEdit.addTextChangedListener(object : SimpleTextWatcher {
-            override fun afterTextChanged(text: Editable) {
-                if (isSettingText) {
-                    return
-                }
-                viewModel.isTextChanged = true
+        binding.textEdit.doAfterTextChanged {
+            if (isSettingText) {
+                return@doAfterTextChanged
             }
-        })
+            viewModel.isTextChanged = true
+        }
 
         val viewLifecycleOwner = viewLifecycleOwner
         viewModel.fileContentLiveData.observe(viewLifecycleOwner) { onFileContentChanged(it) }

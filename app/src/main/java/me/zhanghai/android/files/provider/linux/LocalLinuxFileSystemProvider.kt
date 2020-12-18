@@ -16,7 +16,6 @@ import java8.nio.file.FileStore
 import java8.nio.file.FileSystem
 import java8.nio.file.FileSystemAlreadyExistsException
 import java8.nio.file.LinkOption
-import java8.nio.file.NotLinkException
 import java8.nio.file.OpenOption
 import java8.nio.file.Path
 import java8.nio.file.ProviderMismatchException
@@ -52,7 +51,7 @@ class LocalLinuxFileSystemProvider(provider: LinuxFileSystemProvider) : FileSyst
 
     override fun getScheme(): String = SCHEME
 
-    override fun newFileSystem(uri: URI, env: Map<String?, *>): FileSystem {
+    override fun newFileSystem(uri: URI, env: Map<String, *>): FileSystem {
         uri.requireSameScheme()
         throw FileSystemAlreadyExistsException()
     }
@@ -199,9 +198,7 @@ class LocalLinuxFileSystemProvider(provider: LinuxFileSystemProvider) : FileSyst
         val targetBytes = try {
             Syscalls.readlink(linkBytes)
         } catch (e: SyscallException) {
-            if (e.errno == OsConstants.EINVAL) {
-                throw NotLinkException(linkBytes.toString()).apply { initCause(e) }
-            }
+            e.maybeThrowNotLinkException(linkBytes.toString())
             throw e.toFileSystemException(linkBytes.toString())
         }
         return ByteStringPath(targetBytes)
@@ -330,9 +327,9 @@ class LocalLinuxFileSystemProvider(provider: LinuxFileSystemProvider) : FileSyst
         path: Path,
         vararg options: LinkOption
     ): LinuxFileAttributeView {
-        val linuxPath = path as? LinuxPath ?: throw ProviderMismatchException(path.toString())
+        path as? LinuxPath ?: throw ProviderMismatchException(path.toString())
         val linkOptions = options.toLinkOptions()
-        return LinuxFileAttributeView(linuxPath, linkOptions.noFollowLinks)
+        return LinuxFileAttributeView(path, linkOptions.noFollowLinks)
     }
 
     override fun readAttributes(

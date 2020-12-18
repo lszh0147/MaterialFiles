@@ -6,13 +6,13 @@
 package me.zhanghai.android.files.about
 
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import me.zhanghai.android.files.databinding.AboutFragmentBinding
 import me.zhanghai.android.files.ui.LicensesDialogFragment
@@ -32,7 +32,7 @@ class AboutFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
+    ): View =
         AboutFragmentBinding.inflate(inflater, container, false)
             .also { binding = it }
             .root
@@ -43,17 +43,13 @@ class AboutFragment : Fragment() {
         val activity = requireActivity() as AppCompatActivity
         activity.setSupportActionBar(binding.toolbar)
         binding.gitHubLayout.setOnClickListener { startActivitySafe(GITHUB_URI.createViewIntent()) }
-        binding.licensesLayout.setOnClickListener {
-            // @see https://github.com/zhanghai/MaterialFiles/issues/161
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                LicensesDialogFragment.show(this)
-            } else {
-                startActivitySafe(LICENSES_URI.createViewIntent())
-            }
-        }
+        binding.licensesLayout.setOnClickListener { LicensesDialogFragment.show(this) }
+//#ifdef NONFREE
+        binding.privacyPolicyLayout.isVisible = true
         binding.privacyPolicyLayout.setOnClickListener {
             startActivitySafe(PRIVACY_POLICY_URI.createViewIntent())
         }
+//#endif
         binding.authorNameLayout.setOnClickListener {
             startActivitySafe(AUTHOR_RESUME_URI.createViewIntent())
         }
@@ -83,10 +79,6 @@ class AboutFragment : Fragment() {
 
     companion object {
         private val GITHUB_URI = Uri.parse("https://github.com/zhanghai/MaterialFiles")
-        private val LICENSES_URI = Uri.parse(
-            "https://github.com/zhanghai/MaterialFiles/blob/master/app/src/main/res/raw" +
-                "/licenses.xml"
-        )
         private val PRIVACY_POLICY_URI =
             Uri.parse("https://github.com/zhanghai/MaterialFiles/blob/master/PRIVACY.md")
         private val AUTHOR_RESUME_URI = Uri.parse("https://resume.zhanghai.me/")

@@ -16,6 +16,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.system.ErrnoException
@@ -36,6 +37,7 @@ import me.zhanghai.android.files.compat.openProxyFileDescriptorCompat
 import me.zhanghai.android.files.provider.common.InvalidFileNameException
 import me.zhanghai.android.files.provider.common.IsDirectoryException
 import me.zhanghai.android.files.provider.common.force
+import me.zhanghai.android.files.provider.common.getLastModifiedTime
 import me.zhanghai.android.files.provider.common.isForceable
 import me.zhanghai.android.files.provider.common.newByteChannel
 import me.zhanghai.android.files.provider.common.size
@@ -101,7 +103,7 @@ class FileProvider : ContentProvider() {
                         path.size()
                     } catch (e: IOException) {
                         e.printStackTrace()
-                        0
+                        null
                     }
                     columns += column
                     values += size
@@ -114,6 +116,22 @@ class FileProvider : ContentProvider() {
                     }
                     columns += column
                     values += file.absolutePath
+                }
+                // TODO: We should actually implement a DocumentsProvider since we are handling
+                //  ACTION_OPEN_DOCUMENT.
+                DocumentsContract.Document.COLUMN_MIME_TYPE -> {
+                    columns += column
+                    values += MimeType.guessFromPath(path.toString()).value
+                }
+                DocumentsContract.Document.COLUMN_LAST_MODIFIED -> {
+                    val lastModified = try {
+                        path.getLastModifiedTime().toMillis()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        null
+                    }
+                    columns += column
+                    values += lastModified
                 }
             }
         }
@@ -245,13 +263,20 @@ class FileProvider : ContentProvider() {
                 this.offset = offset
             }
             val buffer = ByteBuffer.wrap(data, 0, size)
-            return try {
-                // ReadableByteChannel returns -1 upon end-of-stream, however read(2) returns 0 in
-                // this case.
-                channel.read(buffer).let { if (it == -1) 0 else it }
-            } catch (e: IOException) {
-                throw e.toErrnoException()
-            }.also { this.offset += it.toLong() }
+            // Unlike ReadableByteChannel which may not fill the buffer and returns -1 upon
+            // end-of-stream, we need to read as much as we can unless end-of-stream is reached.
+            while (buffer.hasRemaining()) {
+                val channelSize = try {
+                    channel.read(buffer)
+                } catch (e: IOException) {
+                    throw e.toErrnoException()
+                }
+                if (channelSize == -1) {
+                    break
+                }
+                this.offset += channelSize
+            }
+            return (this.offset - offset).toInt()
         }
 
         @Throws(ErrnoException::class)
