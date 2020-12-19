@@ -14,6 +14,7 @@
     <string name="cut">剪切</string>
     <string name="default_">默认</string>
     <string name="delete">删除</string>
+    <string name="quick_delete">快速删除</string>
     <string name="discard">舍弃</string>
     <string name="empty">空</string>
     <string name="empty_placeholder">（空）</string>

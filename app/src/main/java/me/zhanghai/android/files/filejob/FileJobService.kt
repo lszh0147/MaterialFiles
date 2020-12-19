@@ -12,6 +12,7 @@ import android.os.IBinder
 import androidx.annotation.MainThread
 import java8.nio.file.Path
 import me.zhanghai.android.files.file.MimeType
+import me.zhanghai.android.files.filelist.FileItemSet
 import me.zhanghai.android.files.provider.common.PosixFileModeBit
 import me.zhanghai.android.files.provider.common.PosixGroup
 import me.zhanghai.android.files.provider.common.PosixUser
@@ -115,6 +116,10 @@ class FileJobService : Service() {
 
         fun delete(paths: List<Path>, context: Context) {
             startJob(DeleteFileJob(paths), context)
+        }
+
+        fun quickDelete(paths: List<Path>, context: Context) {
+            startJob(QuickDeleteFileJob(paths), context)
         }
 
         fun move(sources: List<Path>, targetDirectory: Path, context: Context) {

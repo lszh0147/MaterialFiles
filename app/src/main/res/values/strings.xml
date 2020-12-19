@@ -14,6 +14,7 @@
     <string name="cut">Cut</string>
     <string name="default_">Default</string>
     <string name="delete">Delete</string>
+    <string name="quick_delete" translatable="false">Quick Delete</string>
     <string name="discard">Discard</string>
     <string name="empty">Empty</string>
     <string name="empty_placeholder">(Empty)</string>

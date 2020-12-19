@@ -24,6 +24,10 @@
         android:title="@string/delete" />
 
     <item
+        android:id="@+id/action_quick_delete"
+        android:title="@string/quick_delete" />
+
+    <item
         android:id="@+id/action_rename"
         android:title="@string/rename" />
 

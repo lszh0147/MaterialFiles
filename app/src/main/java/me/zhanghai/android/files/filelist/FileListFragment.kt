@@ -114,7 +114,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import java.util.LinkedHashSet
 
 class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.Listener,
-    OpenApkDialogFragment.Listener, ConfirmDeleteFilesDialogFragment.Listener,
+    OpenApkDialogFragment.Listener, ConfirmDeleteFilesDialogFragment.Listener,ConfirmQuickDeleteFilesDialogFragment.Listener,
     CreateArchiveDialogFragment.Listener, RenameFileDialogFragment.Listener,
     CreateFileDialogFragment.Listener, CreateDirectoryDialogFragment.Listener,
     NavigationFragment.Listener {
@@ -847,8 +847,17 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         ConfirmDeleteFilesDialogFragment.show(files, this)
     }
 
+    private fun confirmQuickDeleteFiles(files: FileItemSet) {
+        ConfirmQuickDeleteFilesDialogFragment.show(files, this)
+    }
+
     override fun deleteFiles(files: FileItemSet) {
         FileJobService.delete(makePathListForJob(files), requireContext())
+        viewModel.selectFiles(files, false)
+    }
+
+    override fun quickDeleteFiles(files: FileItemSet) {
+        FileJobService.quickDelete(makePathListForJob(files), requireContext())
         viewModel.selectFiles(files, false)
     }
 
@@ -1111,6 +1120,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     override fun confirmDeleteFile(file: FileItem) {
         confirmDeleteFiles(fileItemSetOf(file))
+    }
+
+    override fun confirmQuickDeleteFile(file: FileItem) {
+        confirmQuickDeleteFiles(fileItemSetOf(file))
     }
 
     override fun showRenameFileDialog(file: FileItem) {

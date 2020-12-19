@@ -10,82 +10,28 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.util.Log
 import androidx.annotation.AnyRes
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
-import java8.nio.file.CopyOption
-import java8.nio.file.DirectoryIteratorException
-import java8.nio.file.FileAlreadyExistsException
-import java8.nio.file.FileVisitResult
-import java8.nio.file.FileVisitor
-import java8.nio.file.Files
-import java8.nio.file.LinkOption
-import java8.nio.file.Path
-import java8.nio.file.Paths
-import java8.nio.file.SimpleFileVisitor
-import java8.nio.file.StandardCopyOption
-import java8.nio.file.StandardOpenOption
+import java8.nio.file.*
 import java8.nio.file.attribute.BasicFileAttributes
 import kotlinx.coroutines.runBlocking
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.BackgroundActivityStarter
 import me.zhanghai.android.files.app.mainExecutor
-import me.zhanghai.android.files.file.FileItem
-import me.zhanghai.android.files.file.MimeType
-import me.zhanghai.android.files.file.asFileSize
-import me.zhanghai.android.files.file.fileProviderUri
-import me.zhanghai.android.files.file.loadFileItem
+import me.zhanghai.android.files.file.*
+import me.zhanghai.android.files.filelist.FileItemSet
 import me.zhanghai.android.files.filelist.OpenFileAsDialogActivity
 import me.zhanghai.android.files.filelist.OpenFileAsDialogFragment
 import me.zhanghai.android.files.provider.archive.archiveFile
 import me.zhanghai.android.files.provider.archive.archiver.ArchiveWriter
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
-import me.zhanghai.android.files.provider.common.ByteString
-import me.zhanghai.android.files.provider.common.ByteStringBuilder
-import me.zhanghai.android.files.provider.common.InvalidFileNameException
-import me.zhanghai.android.files.provider.common.PosixFileModeBit
-import me.zhanghai.android.files.provider.common.PosixFileStore
-import me.zhanghai.android.files.provider.common.PosixGroup
-import me.zhanghai.android.files.provider.common.PosixPrincipal
-import me.zhanghai.android.files.provider.common.PosixUser
-import me.zhanghai.android.files.provider.common.ProgressCopyOption
+import me.zhanghai.android.files.provider.common.*
 import me.zhanghai.android.files.provider.common.ReadOnlyFileSystemException
-import me.zhanghai.android.files.provider.common.asByteStringListPath
-import me.zhanghai.android.files.provider.common.copyTo
-import me.zhanghai.android.files.provider.common.createDirectories
-import me.zhanghai.android.files.provider.common.createDirectory
-import me.zhanghai.android.files.provider.common.createFile
-import me.zhanghai.android.files.provider.common.delete
-import me.zhanghai.android.files.provider.common.deleteIfExists
-import me.zhanghai.android.files.provider.common.exists
-import me.zhanghai.android.files.provider.common.getFileStore
-import me.zhanghai.android.files.provider.common.getMode
-import me.zhanghai.android.files.provider.common.getPath
-import me.zhanghai.android.files.provider.common.isDirectory
-import me.zhanghai.android.files.provider.common.moveTo
-import me.zhanghai.android.files.provider.common.newByteChannel
-import me.zhanghai.android.files.provider.common.newDirectoryStream
-import me.zhanghai.android.files.provider.common.newOutputStream
-import me.zhanghai.android.files.provider.common.readAttributes
-import me.zhanghai.android.files.provider.common.resolveForeign
-import me.zhanghai.android.files.provider.common.restoreSeLinuxContext
-import me.zhanghai.android.files.provider.common.setGroup
-import me.zhanghai.android.files.provider.common.setMode
-import me.zhanghai.android.files.provider.common.setOwner
-import me.zhanghai.android.files.provider.common.setSeLinuxContext
-import me.zhanghai.android.files.provider.common.toByteString
-import me.zhanghai.android.files.provider.common.toModeString
 import me.zhanghai.android.files.provider.linux.isLinuxPath
-import me.zhanghai.android.files.util.asFileName
-import me.zhanghai.android.files.util.createInstallPackageIntent
-import me.zhanghai.android.files.util.createIntent
-import me.zhanghai.android.files.util.createViewIntent
-import me.zhanghai.android.files.util.extraPath
-import me.zhanghai.android.files.util.getQuantityString
-import me.zhanghai.android.files.util.putArgs
-import me.zhanghai.android.files.util.toEnumSet
-import me.zhanghai.android.files.util.withChooser
+import me.zhanghai.android.files.util.*
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
@@ -943,6 +889,24 @@ class DeleteFileJob(private val paths: List<Path>) : FileJob() {
                 return FileVisitResult.CONTINUE
             }
         })
+    }
+}
+
+class QuickDeleteFileJob(private val paths: List<Path>) : FileJob() {
+    @Throws(IOException::class)
+    override fun run() {
+        postNotification("Quick Delete", "Deleteing", null, null, 100, 0, true, true)
+        for (path in paths) {
+            Log.d("mytest","isDirectory="+path.isDirectory()+"  ,path="+path)
+            if (path.isDirectory()){
+                rmdir(path.toFile())
+            }else{
+                path.delete()
+            }
+            throwIfInterrupted()
+        }
+        postNotification("Delete", "Deleteing", null, null, 100, 100, true, true)
+
     }
 }
 
@@ -2191,3 +2155,22 @@ private fun FileJob.postWriteNotification(transferInfo: TransferInfo) {
     val progress = transferredSize.toInt()
     postNotification(title, text, null, null, max, progress, false, true)
 }
+
+
+
+private  fun FileJob. rmdir(dir: File) {
+    if (!dir.exists()) {
+        return
+    }
+    val files = dir.listFiles()
+    for (i in files.indices) {
+        val file = files[i]
+        if (file.isDirectory) {
+            rmdir(file)
+        } else {
+            file.delete()
+        }
+    }
+    dir.delete()
+}
+

@@ -260,6 +260,10 @@ class FileListAdapter(
                     listener.confirmDeleteFile(file)
                     true
                 }
+                R.id.action_quick_delete -> {
+                    listener.confirmQuickDeleteFile(file)
+                    true
+                }
                 R.id.action_rename -> {
                     listener.showRenameFileDialog(file)
                     true
@@ -330,6 +334,7 @@ class FileListAdapter(
         fun cutFile(file: FileItem)
         fun copyFile(file: FileItem)
         fun confirmDeleteFile(file: FileItem)
+        fun confirmQuickDeleteFile(file: FileItem)
         fun showRenameFileDialog(file: FileItem)
         fun extractFile(file: FileItem)
         fun showCreateArchiveDialog(file: FileItem)
