@@ -289,14 +289,16 @@ private fun FileJob.postTransferSizeNotification(
         val sizeString = size.asFileSize().formatHumanReadable(service)
         val transferredSizeString = transferredSize.asFileSize().formatHumanReadable(service)
         text = getString(
-            R.string.file_job_transfer_size_notification_text_one, transferredSizeString, sizeString
+            R.string.file_job_transfer_size_notification_text_one_format, transferredSizeString,
+            sizeString
         )
     } else {
         title = getQuantityString(titleMultipleRes, fileCount, fileCount, getFileName(target))
         val currentFileIndex = (transferInfo.transferredFileCount + 1)
             .coerceAtMost(fileCount)
         text = getString(
-            R.string.file_job_transfer_size_notification_text_multiple, currentFileIndex, fileCount
+            R.string.file_job_transfer_size_notification_text_multiple_format, currentFileIndex,
+            fileCount
         )
     }
     val max: Int
@@ -343,7 +345,8 @@ private fun FileJob.postTransferCountNotification(
         val transferredFileCount = transferInfo.transferredFileCount
         val currentFileIndex = (transferredFileCount + 1).coerceAtMost(fileCount)
         text = getString(
-            R.string.file_job_transfer_count_notification_text_multiple, currentFileIndex, fileCount
+            R.string.file_job_transfer_count_notification_text_multiple_format, currentFileIndex,
+            fileCount
         )
         max = fileCount
         progress = transferredFileCount
@@ -529,7 +532,7 @@ class ArchiveFileJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val scanInfo = scan(sources, R.plurals.file_job_archive_scan_notification_title)
+        val scanInfo = scan(sources, R.plurals.file_job_archive_scan_notification_title_format)
         val channel = archiveFile.newByteChannel(
             StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE
         )
@@ -636,8 +639,8 @@ private fun FileJob.archive(
 
 private fun FileJob.postArchiveNotification(transferInfo: TransferInfo, currentFile: Path) {
     postTransferSizeNotification(
-        transferInfo, currentFile, R.string.file_job_archive_notification_title_one,
-        R.plurals.file_job_archive_notification_title_multiple
+        transferInfo, currentFile, R.string.file_job_archive_notification_title_one_format,
+        R.plurals.file_job_archive_notification_title_multiple_format
     )
 }
 
@@ -647,9 +650,9 @@ class CopyFileJob(private val sources: List<Path>, private val targetDirectory: 
         val isExtract = sources.all { it.isArchivePath }
         val scanInfo = scan(
             sources, if (isExtract) {
-                R.plurals.file_job_extract_scan_notification_title
+                R.plurals.file_job_extract_scan_notification_title_format
             } else {
-                R.plurals.file_job_copy_scan_notification_title
+                R.plurals.file_job_copy_scan_notification_title_format
             }
         )
         val transferInfo = TransferInfo(scanInfo, targetDirectory)
@@ -846,7 +849,7 @@ private fun FileJob.create(path: Path, createDirectory: Boolean) {
 class DeleteFileJob(private val paths: List<Path>) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val scanInfo = scan(paths, R.plurals.file_job_delete_scan_notification_title)
+        val scanInfo = scan(paths, R.plurals.file_job_delete_scan_notification_title_format)
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
         for (path in paths) {
@@ -974,8 +977,8 @@ private fun FileJob.delete(path: Path, transferInfo: TransferInfo?, actionAllInf
 
 private fun FileJob.postDeleteNotification(transferInfo: TransferInfo, currentPath: Path) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_delete_notification_title_one,
-        R.plurals.file_job_delete_notification_title_multiple
+        transferInfo, currentPath, R.string.file_job_delete_notification_title_one_format,
+        R.plurals.file_job_delete_notification_title_multiple_format
     )
 }
 
@@ -994,7 +997,7 @@ class MoveFileJob(private val sources: List<Path>, private val targetDirectory: 
             }
             throwIfInterrupted()
         }
-        val scanInfo = scan(sourcesToMove, R.plurals.file_job_move_scan_notification_title)
+        val scanInfo = scan(sourcesToMove, R.plurals.file_job_move_scan_notification_title_format)
         val transferInfo = TransferInfo(scanInfo, targetDirectory)
         val actionAllInfo = ActionAllInfo()
         for (source in sourcesToMove) {
@@ -1349,13 +1352,13 @@ private fun FileJob.postCopyMoveNotification(
 ) {
     postTransferSizeNotification(
         transferInfo, currentSource, type.getResourceId(
-            R.string.file_job_copy_notification_title_one,
-            R.string.file_job_extract_notification_title_one,
-            R.string.file_job_move_notification_title_one
+            R.string.file_job_copy_notification_title_one_format,
+            R.string.file_job_extract_notification_title_one_format,
+            R.string.file_job_move_notification_title_one_format
         ), type.getResourceId(
-            R.plurals.file_job_copy_notification_title_multiple,
-            R.plurals.file_job_extract_notification_title_multiple,
-            R.plurals.file_job_move_notification_title_multiple
+            R.plurals.file_job_copy_notification_title_multiple_format,
+            R.plurals.file_job_extract_notification_title_multiple_format,
+            R.plurals.file_job_move_notification_title_multiple_format
         )
     )
 }
@@ -1420,9 +1423,9 @@ private fun FileJob.open(
     val isExtract = file.isArchivePath
     val scanInfo = scan(
         file, if (isExtract) {
-            R.plurals.file_job_extract_scan_notification_title
+            R.plurals.file_job_extract_scan_notification_title_format
         } else {
-            R.plurals.file_job_copy_scan_notification_title
+            R.plurals.file_job_copy_scan_notification_title_format
         }
     )
     val cacheDirectory = Paths.get(cacheDirectory.path, "open_cache")
@@ -1458,7 +1461,7 @@ private fun FileJob.rename(path: Path, newPath: Path) {
         } catch (e: IOException) {
             e.printStackTrace()
             val result = showActionDialog(
-                getString(R.string.file_job_rename_error_title, getFileName(path)),
+                getString(R.string.file_job_rename_error_title_format, getFileName(path)),
                 getString(
                     R.string.file_job_rename_error_message_format, getFileName(newPath),
                     e.toString()
@@ -1488,7 +1491,8 @@ class RestoreFileSeLinuxContextJob(
     @Throws(IOException::class)
     override fun run() {
         val scanInfo = scan(
-            path, recursive, R.plurals.file_job_restore_selinux_context_scan_notification_title
+            path, recursive,
+            R.plurals.file_job_restore_selinux_context_scan_notification_title_format
         )
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
@@ -1590,8 +1594,9 @@ private fun FileJob.postRestoreSeLinuxContextNotification(
     currentPath: Path
 ) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_restore_selinux_context_notification_title_one,
-        R.plurals.file_job_restore_selinux_context_notification_title_multiple
+        transferInfo, currentPath,
+        R.string.file_job_restore_selinux_context_notification_title_one_format,
+        R.plurals.file_job_restore_selinux_context_notification_title_multiple_format
     )
 }
 
@@ -1602,7 +1607,9 @@ class SetFileGroupJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val scanInfo = scan(path, recursive, R.plurals.file_job_set_group_scan_notification_title)
+        val scanInfo = scan(
+            path, recursive, R.plurals.file_job_set_group_scan_notification_title_format
+        )
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
         walkFileTreeForSettingAttributes(path, recursive, object : SimpleFileVisitor<Path>() {
@@ -1701,8 +1708,8 @@ private fun FileJob.setGroup(
 
 private fun FileJob.postSetGroupNotification(transferInfo: TransferInfo, currentPath: Path) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_set_group_notification_title_one,
-        R.plurals.file_job_set_group_notification_title_multiple
+        transferInfo, currentPath, R.string.file_job_set_group_notification_title_one_format,
+        R.plurals.file_job_set_group_notification_title_multiple_format
     )
 }
 
@@ -1714,7 +1721,9 @@ class SetFileModeJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val scanInfo = scan(path, recursive, R.plurals.file_job_set_mode_scan_notification_title)
+        val scanInfo = scan(
+            path, recursive, R.plurals.file_job_set_mode_scan_notification_title_format
+        )
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
         walkFileTreeForSettingAttributes(path, recursive, object : SimpleFileVisitor<Path>() {
@@ -1838,8 +1847,8 @@ private fun FileJob.setMode(
 
 private fun FileJob.postSetModeNotification(transferInfo: TransferInfo, currentPath: Path) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_set_mode_notification_title_one,
-        R.plurals.file_job_set_mode_notification_title_multiple
+        transferInfo, currentPath, R.string.file_job_set_mode_notification_title_one_format,
+        R.plurals.file_job_set_mode_notification_title_multiple_format
     )
 }
 
@@ -1850,7 +1859,9 @@ class SetFileOwnerJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val scanInfo = scan(path, recursive, R.plurals.file_job_set_owner_scan_notification_title)
+        val scanInfo = scan(
+            path, recursive, R.plurals.file_job_set_owner_scan_notification_title_format
+        )
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
         walkFileTreeForSettingAttributes(path, recursive, object : SimpleFileVisitor<Path>() {
@@ -1949,8 +1960,8 @@ private fun FileJob.setOwner(
 
 private fun FileJob.postSetOwnerNotification(transferInfo: TransferInfo, currentPath: Path) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_set_owner_notification_title_one,
-        R.plurals.file_job_set_owner_notification_title_multiple
+        transferInfo, currentPath, R.string.file_job_set_owner_notification_title_one_format,
+        R.plurals.file_job_set_owner_notification_title_multiple_format
     )
 }
 
@@ -1965,7 +1976,7 @@ class SetFileSeLinuxContextJob(
     @Throws(IOException::class)
     override fun run() {
         val scanInfo = scan(
-            path, recursive, R.plurals.file_job_set_selinux_context_scan_notification_title
+            path, recursive, R.plurals.file_job_set_selinux_context_scan_notification_title_format
         )
         val transferInfo = TransferInfo(scanInfo, null)
         val actionAllInfo = ActionAllInfo()
@@ -2075,8 +2086,9 @@ private fun FileJob.postSetSeLinuxContextNotification(
     currentPath: Path
 ) {
     postTransferCountNotification(
-        transferInfo, currentPath, R.string.file_job_set_selinux_context_notification_title_one,
-        R.plurals.file_job_set_selinux_context_notification_title_multiple
+        transferInfo, currentPath,
+        R.string.file_job_set_selinux_context_notification_title_one_format,
+        R.plurals.file_job_set_selinux_context_notification_title_multiple_format
     )
 }
 
@@ -2087,8 +2099,8 @@ class WriteFileJob(
 ) : FileJob() {
     @Throws(IOException::class)
     override fun run() {
-        val success = write(file, content)
-        listener?.let { mainExecutor.execute { it(success) } }
+        val successful = write(file, content)
+        listener?.let { mainExecutor.execute { it(successful) } }
     }
 }
 
@@ -2143,13 +2155,14 @@ private fun FileJob.postWriteNotification(transferInfo: TransferInfo) {
         return
     }
     val target = transferInfo.target!!
-    val title = getString(R.string.file_job_write_notification_title, getFileName(target))
+    val title = getString(R.string.file_job_write_notification_title_format, getFileName(target))
     val size = transferInfo.size
     val sizeString = size.asFileSize().formatHumanReadable(service)
     val transferredSize = transferInfo.transferredSize
     val transferredSizeString = transferredSize.asFileSize().formatHumanReadable(service)
     val text = getString(
-        R.string.file_job_transfer_size_notification_text_one, transferredSizeString, sizeString
+        R.string.file_job_transfer_size_notification_text_one_format, transferredSizeString,
+        sizeString
     )
     val max = size.toInt()
     val progress = transferredSize.toInt()

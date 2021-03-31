@@ -5,10 +5,10 @@
 
 package me.zhanghai.android.files.storage
 
+import android.app.Activity
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -29,8 +29,10 @@ import me.zhanghai.android.files.util.Stateful
 import me.zhanghai.android.files.util.Success
 import me.zhanghai.android.files.util.args
 import me.zhanghai.android.files.util.fadeToVisibilityUnsafe
+import me.zhanghai.android.files.util.finish
 import me.zhanghai.android.files.util.getTextArray
 import me.zhanghai.android.files.util.hideTextInputLayoutErrorOnTextChange
+import me.zhanghai.android.files.util.setResult
 import me.zhanghai.android.files.util.showToast
 import me.zhanghai.android.files.util.takeIfNotEmpty
 import me.zhanghai.android.files.util.viewModels
@@ -41,12 +43,6 @@ class EditSmbServerFragment : Fragment() {
     private val viewModel by viewModels { { EditSmbServerViewModel() } }
 
     private lateinit var binding: EditSmbServerFragmentBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setHasOptionsMenu(true)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,6 +58,7 @@ class EditSmbServerFragment : Fragment() {
 
         val activity = requireActivity() as AppCompatActivity
         activity.setSupportActionBar(binding.toolbar)
+        activity.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         activity.setTitle(
             if (args.server != null) {
                 R.string.storage_edit_smb_server_title_edit
@@ -85,7 +82,6 @@ class EditSmbServerFragment : Fragment() {
             onAuthenticationTypeChanged(authenticationType)
         }
         binding.usernameEdit.hideTextInputLayoutErrorOnTextChange(binding.usernameLayout)
-        binding.passwordEdit.hideTextInputLayoutErrorOnTextChange(binding.passwordLayout)
         binding.saveOrConnectAndAddButton.setText(
             if (args.server != null) {
                 R.string.save
@@ -128,9 +124,14 @@ class EditSmbServerFragment : Fragment() {
                     else -> {
                         authenticationType = AuthenticationType.PASSWORD
                         binding.usernameEdit.setText(authentication.username)
-                        binding.passwordEdit.setText(authentication.password)
                         binding.domainEdit.setText(authentication.domain)
+                        binding.passwordEdit.setText(authentication.password)
                     }
+                }
+            } else {
+                val host = args.host
+                if (host != null) {
+                    binding.hostEdit.setText(host)
                 }
             }
         }
@@ -139,19 +140,6 @@ class EditSmbServerFragment : Fragment() {
             onConnectStatefulChanged(it)
         }
     }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                // This recreates MainActivity but we cannot have singleTop as launch mode along
-                // with document launch mode.
-                //AppCompatActivity activity = (AppCompatActivity) requireActivity();
-                //activity.onSupportNavigateUp();
-                requireActivity().finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
 
     private fun updateNamePlaceholder() {
         val host = binding.hostEdit.text.toString().takeIfNotEmpty()
@@ -178,6 +166,7 @@ class EditSmbServerFragment : Fragment() {
             val adapter = binding.authenticationTypeEdit.adapter
             val item = adapter.getItem(value.ordinal) as CharSequence
             binding.authenticationTypeEdit.setText(item, false)
+            onAuthenticationTypeChanged(value)
         }
 
     private fun onAuthenticationTypeChanged(authenticationType: AuthenticationType) {
@@ -189,6 +178,7 @@ class EditSmbServerFragment : Fragment() {
     private fun saveOrAdd() {
         val server = getServerOrSetError() ?: return
         Storages.addOrReplace(server)
+        setResult(Activity.RESULT_OK)
         finish()
     }
 
@@ -211,6 +201,7 @@ class EditSmbServerFragment : Fragment() {
             }
             is Success -> {
                 Storages.addOrReplace(connectStateful.value)
+                setResult(Activity.RESULT_OK)
                 finish()
                 return
             }
@@ -224,6 +215,7 @@ class EditSmbServerFragment : Fragment() {
 
     private fun remove() {
         Storages.remove(args.server!!)
+        setResult(Activity.RESULT_OK)
         finish()
     }
 
@@ -232,7 +224,7 @@ class EditSmbServerFragment : Fragment() {
         val host = binding.hostEdit.text.toString().takeIfNotEmpty()
         if (host == null) {
             binding.hostLayout.error =
-                getString(R.string.storage_edit_smb_server_host_empty_error)
+                getString(R.string.storage_edit_smb_server_host_error_empty)
             if (errorEdit == null) {
                 errorEdit = binding.hostEdit
             }
@@ -240,7 +232,7 @@ class EditSmbServerFragment : Fragment() {
         val port = binding.portEdit.text.toString().takeIfNotEmpty()
             .let { if (it != null) it.toIntOrNull() else Authority.DEFAULT_PORT }
         if (port == null) {
-            binding.portLayout.error = getString(R.string.storage_edit_smb_server_port_error)
+            binding.portLayout.error = getString(R.string.storage_edit_smb_server_port_error_invalid)
             if (errorEdit == null) {
                 errorEdit = binding.portEdit
             }
@@ -251,21 +243,14 @@ class EditSmbServerFragment : Fragment() {
                 val username = binding.usernameEdit.text.toString().takeIfNotEmpty()
                 if (username == null) {
                     binding.usernameLayout.error =
-                        getString(R.string.storage_edit_smb_server_username_empty_error)
+                        getString(R.string.storage_edit_smb_server_username_error_empty)
                     if (errorEdit == null) {
                         errorEdit = binding.usernameEdit
                     }
                 }
-                val password = binding.passwordEdit.text.toString().takeIfNotEmpty()
-                if (password == null) {
-                    binding.passwordLayout.error =
-                        getString(R.string.storage_edit_smb_server_password_empty_error)
-                    if (errorEdit == null) {
-                        errorEdit = binding.passwordEdit
-                    }
-                }
                 val domain = binding.domainEdit.text.toString().takeIfNotEmpty()
-                if (errorEdit == null) Authentication(username!!, password!!, domain) else null
+                val password = binding.passwordEdit.text.toString()
+                if (errorEdit == null) Authentication(username!!, domain, password) else null
             }
             AuthenticationType.GUEST -> Authentication.GUEST
             AuthenticationType.ANONYMOUS -> Authentication.ANONYMOUS
@@ -275,15 +260,14 @@ class EditSmbServerFragment : Fragment() {
             return null
         }
         val authority = Authority(host!!, port!!)
-        return SmbServer(args.server?.id, name ?: authority.toString(), authority, authentication!!)
-    }
-
-    private fun finish() {
-        requireActivity().finish()
+        return SmbServer(args.server?.id, name, authority, authentication!!)
     }
 
     @Parcelize
-    class Args(val server: SmbServer?) : ParcelableArgs
+    class Args(
+        val server: SmbServer? = null,
+        val host: String? = null
+    ) : ParcelableArgs
 
     private enum class AuthenticationType {
         PASSWORD,

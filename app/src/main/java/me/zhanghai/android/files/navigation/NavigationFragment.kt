@@ -21,11 +21,11 @@ import me.zhanghai.android.files.provider.document.documentTreeUri
 import me.zhanghai.android.files.provider.document.isDocumentPath
 import me.zhanghai.android.files.storage.AddStorageDialogActivity
 import me.zhanghai.android.files.storage.Storage
-import me.zhanghai.android.files.storage.Storages
 import me.zhanghai.android.files.util.createIntent
+import me.zhanghai.android.files.util.putArgs
+import me.zhanghai.android.files.util.startActivitySafe
 
-class NavigationFragment : Fragment(), NavigationItem.Listener,
-    EditBookmarkDirectoryDialogFragment.Listener {
+class NavigationFragment : Fragment(), NavigationItem.Listener {
     private lateinit var binding: NavigationFragmentBinding
 
     private lateinit var adapter: NavigationListAdapter
@@ -77,14 +77,11 @@ class NavigationFragment : Fragment(), NavigationItem.Listener,
     }
 
     override fun onAddStorage() {
-        startActivity(AddStorageDialogActivity::class.createIntent())
+        startActivitySafe(AddStorageDialogActivity::class.createIntent())
     }
 
     override fun onEditStorage(storage: Storage) {
-        // TODO
-        //ConfirmRemoveDocumentTreeDialogFragment.show(treeUri, storageVolume, this)
-        // For debugging
-        Storages.remove(storage)
+        startActivitySafe(storage.createEditIntent())
     }
 
     // TODO
@@ -99,15 +96,10 @@ class NavigationFragment : Fragment(), NavigationItem.Listener,
     }
 
     override fun onEditBookmarkDirectory(bookmarkDirectory: BookmarkDirectory) {
-        EditBookmarkDirectoryDialogFragment.show(bookmarkDirectory, this)
-    }
-
-    override fun replaceBookmarkDirectory(bookmarkDirectory: BookmarkDirectory) {
-        BookmarkDirectories.replace(bookmarkDirectory)
-    }
-
-    override fun removeBookmarkDirectory(bookmarkDirectory: BookmarkDirectory) {
-        BookmarkDirectories.remove(bookmarkDirectory)
+        startActivitySafe(
+            EditBookmarkDirectoryDialogActivity::class.createIntent()
+                .putArgs(EditBookmarkDirectoryDialogFragment.Args(bookmarkDirectory))
+        )
     }
 
     override fun closeNavigationDrawer() {

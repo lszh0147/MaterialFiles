@@ -27,6 +27,8 @@ import me.zhanghai.android.files.compat.getColorCompat
 import me.zhanghai.android.files.compat.getColorStateListCompat
 import me.zhanghai.android.files.compat.getDrawableCompat
 
+fun Fragment.finish() = requireActivity().finish()
+
 fun Fragment.getAnimation(@AnimRes id: Int) = requireContext().getAnimation(id)
 
 fun Fragment.getBoolean(@BoolRes id: Int) = requireContext().getBoolean(id)
@@ -114,6 +116,9 @@ fun Fragment.dpToDimensionPixelSize(@Dimension(unit = Dimension.DP) dp: Float) =
 @Dimension
 fun Fragment.dpToDimensionPixelSize(@Dimension(unit = Dimension.DP) dp: Int) =
     requireContext().dpToDimensionPixelSize(dp)
+
+fun Fragment.setResult(resultCode: Int, resultData: Intent? = null) =
+    requireActivity().setResult(resultCode, resultData)
 
 val Fragment.shortAnimTime
     get() = requireContext().shortAnimTime
